@@ -1,0 +1,86 @@
+
+
+ETL Pipeline:
+
+	Goal:
+	The goal of this section is to document the design and implementation of the ETL (Extract, Transform, Load) pipeline used to process the Olist e-commerce 	dataset. This includes data extraction from source systems, transformation using PySpark in Databricks, and loading into optimized storage layers for 	analytics.
+
+
+
+	ETL Pipeline Overview:
+
+		The ETL pipeline follows the Medallion Architecture approach, organizing data into three structured layers:
+		1. Bronze Layer: Raw data ingestion from various sources into Azure Data Lake Gen2.
+		2. Silver Layer: Data cleansing, transformation, and schema enforcement using PySpark in Azure Databricks.
+		3. Gold Layer: Creation of fact and dimension tables for analytical workloads and reporting.
+
+
+
+	1. Data Extraction (Extract Phase):
+	
+		- Source: Olist e-commerce dataset (CSV files, API endpoints)	
+		- Technology: Azure Data Factory (ADF)
+	
+	- Process:
+ 
+		 1. Linked Services: Configured to connect with web API and storage accounts.
+  	 	2. Datasets: Defined schemas for structured ingestion.
+ 	 	3. Pipelines: Automated ingestion using Copy Activity and parameterized configurations.
+ 	 	4. Data Storage: Extracted data is stored in the Bronze Layer of Azure Data Lake Gen2.
+
+
+
+	2. Data Transformation (Transform Phase):
+
+	- Technology: Azure Databricks (PySpark, Delta Lake)
+
+	- Process:
+  
+		 1. Reading Raw Data: Using Auto Loader for incremental ingestion from ADLS Gen2.
+ 		 2. Cleaning & Structuring:
+     			- Standardized column names and data types.
+     			- Removed duplicates and handled missing values.
+     			- Applied necessary business rules and transformations.
+  
+		3. Schema Enforcement: Ensured consistency across datasets.
+  
+		4. Writing to Silver Layer: Processed data is stored in Delta format for efficient querying.
+
+
+
+	3. Data Loading & Modeling (Load Phase):
+
+		- Technology: Azure Databricks, Azure Synapse Analytics (optional)
+	- Process:
+  
+		1. Building Fact & Dimension Tables:
+    		 - Implemented Star Schema with FactSales, DimCustomer, DimProduct, etc.
+     		- Created Surrogate Keys for optimized joins.
+  
+	2. Optimizations:
+     
+		- Z-Ordering & Partitioning for performance improvements.
+     		- Delta Table Vacuuming to manage storage efficiency.
+  	
+	3. Writing to Gold Layer: Optimized tables stored in ADLS Gen2, ready for reporting.
+
+
+
+	4. Workflow Orchestration:
+
+		- Technology: Azure Data Factory, Databricks Workflows
+	- Process:
+  
+		1. ADF Pipelines: Scheduled incremental data loads for real-time processing.
+ 		2. Databricks Workflows: Automated transformations and job executions.
+  		3. Monitoring & Logging: Enabled Azure Monitor for pipeline tracking.
+
+
+
+	Final Configuration & Best Practices:
+
+		✅ Incremental Data Load: Used Watermarking & Checkpoints to process new data efficiently.
+		✅ Error Handling: Implemented try-except blocks and logging mechanisms.
+		✅ Performance Tuning: Optimized queries using Z-Ordering, Partitioning, and Delta Caching.
+		✅ Security & Governance: Managed RBAC & Access Control for secure data access.
+
