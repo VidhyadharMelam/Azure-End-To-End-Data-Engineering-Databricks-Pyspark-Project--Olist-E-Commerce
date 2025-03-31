@@ -1,0 +1,49 @@
+
+
+Data Ingestion Pipeline
+
+	Goal:
+
+	The objective of the data ingestion pipeline is to extract raw data from the Olist e-commerce dataset, transform it into a structured format, and store it in 	Azure Data Lake Gen2 following the Medallion Architecture (Bronze Layer). The pipeline ensures automated, scalable, and efficient data ingestion for downstream 	processing in Azure Databricks.
+
+
+	Data Sources:
+
+		- Web API & Online Repository: The dataset is sourced from an online repository containing customer orders, product details, sellers, geolocation, 			and reviews.
+		- Azure Data Lake Gen2**: Serves as the centralized storage repository, where the raw data is ingested and processed through multiple layers.
+
+
+
+	Ingestion Approach:
+
+		- Azure Data Factory (ADF) Pipelines:
+ 		 - Created an ADF pipeline to orchestrate the ingestion of Olist data into Azure Data Lake Gen2.
+  		- Used Copy Data Activity to extract data from the web source and store it in the Bronze Layer (raw format).
+  		- Implemented ForEach Activity to dynamically ingest multiple tables with parameterized configurations.
+  		- Integrated Lookup and If Condition Activities to check for file existence before ingestion.
+
+	Storage Format:
+  
+		- Data is stored in Delta format in the Bronze Layer to optimize storage and read performance.
+  		- Implemented partitioning based on date attributes to enhance query performance and incremental processing.
+
+	Incremental Data Load:
+  
+		- Configured Watermarking Strategy to track changes and ingest only new or modified data.
+ 		 - Implemented Delta Lake format to efficiently manage incremental loads.
+
+
+	Error Handling & Logging:
+	
+		- Failure Handling: Configured error handling mechanisms in ADF, including retry policies and logging failed records for debugging.
+		- Monitoring & Alerts: Used Azure Monitor and Log Analytics to track pipeline execution, failures, and success rates.
+
+
+
+	Key Benefits:
+✅ Scalability: Handles large volumes of raw e-commerce data efficiently.
+✅ Automation: Fully automated data ingestion with scheduled triggers.
+✅ Cost Optimization: Efficient storage using Parquet and Delta formats, reducing query costs.
+✅ Data Quality: Ensures accurate data ingestion with validation checks and monitoring.
+
+
