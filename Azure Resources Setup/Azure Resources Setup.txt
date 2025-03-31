@@ -1,0 +1,85 @@
+
+
+	Goal:
+
+		The objective of this section is to provide a step-by-step guide for setting up the necessary Azure resources to implement the Olist e-commerce data 		pipeline. This includes configuring cloud storage, compute resources, and data processing tools to ensure a scalable and efficient architecture.
+
+	Azure Account Setup:
+
+		Create an Azure Free Account:
+
+			Navigate to Azure Portal.
+
+			Sign up for a free account with a valid email address.
+
+			Activate free credits for initial setup.
+
+	Azure Resources and Configurations:
+
+		1. Azure Data Lake Storage Gen2 (ADLS Gen2):
+
+			Purpose: Acts as the central storage for the Medallion Architecture (Bronze, Silver, Gold layers).
+
+			Setup Steps:
+
+			In Azure Portal, search for Storage Accounts and create a new account.
+
+			Enable Hierarchical Namespace for optimized performance.
+
+			Create a Container for storing raw and processed data.
+
+		2. Azure Data Factory (ADF):
+
+			Purpose: Manages the data ingestion process from source to Azure Data Lake.
+
+			Setup Steps:
+
+			In Azure Portal, search for Data Factory and create a new instance.
+
+			Configure Linked Services to connect to data sources (e.g., Web API, Blob Storage).
+
+			Build pipelines for automated data extraction and ingestion.
+
+		3. Azure Databricks:
+
+			Purpose: Performs large-scale data transformation and processing using PySpark.
+
+			Setup Steps:
+
+			Search for Azure Databricks in Azure Portal and create a workspace.
+
+			Deploy a cluster with an appropriate node size and auto-scaling enabled.
+
+			Configure Cluster Policies and attach necessary libraries (PySpark, Delta Lake, etc.).
+
+		4. Azure Synapse Analytics (Optional - For Reporting & Analysis):
+
+			Purpose: Provides a data warehouse for optimized reporting and Power BI integration.
+
+			Setup Steps:
+
+			Create a Synapse Workspace in Azure Portal.
+
+			Configure Dedicated SQL Pool for high-performance query execution.
+
+			Link to ADLS Gen2 for seamless data access.
+
+		5. Azure Key Vault:
+
+			Purpose: Secures credentials and connection strings used across pipelines.
+
+			Setup Steps:
+
+			Search for Azure Key Vault and create a new vault.
+
+			Store secrets (e.g., storage account keys, API credentials).
+
+			Integrate with ADF and Databricks for secure access.
+
+		Final Configuration & Best Practices:
+
+		✅ Role-Based Access Control (RBAC): Assign permissions to ensure data security.
+		✅ Monitoring & Logging: Enable Azure Monitor for real-time tracking of pipeline execution.
+		✅ Cost Optimization: Use reserved instances and auto-scaling to minimize costs.
+		✅ High Availability: Enable redundancy and backup strategies for disaster recovery.
+
