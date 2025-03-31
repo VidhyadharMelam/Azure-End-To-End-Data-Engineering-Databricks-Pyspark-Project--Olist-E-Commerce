@@ -1,0 +1,45 @@
+
+
+Olist E-Commerce Data Transformation Pipeline"
+
+	Project Overview
+
+		Business Problem: Olist, an online marketplace, connects various sellers to customers across Brazil. The dataset includes order details, customer 		demographics, payment transactions, and product categories. However, raw transactional data is unstructured, duplicated, and difficult to analyze 		directly for business intelligence and decision-making.
+
+
+	The primary challenges include:
+
+	- Handling large volumes of semi-structured data efficiently.
+	- Cleaning and structuring data for meaningful insights.
+	- Optimizing query performance for real-time reporting.
+	- Creating a scalable data pipeline for continuous data processing.
+
+	Solution Developed	
+
+	To address these challenges, an end-to-end **ETL pipeline** was designed and implemented using **Azure Data Factory, Azure Databricks (PySpark), and Azure Data 	Lake Gen2 following the Medallion Architecture.
+
+1. Data Ingestion (Bronze Layer)
+   - Extracted raw Olist dataset from web sources and ingested it into **Azure Data Lake Gen2 (ADLS Gen2)** using **Azure Data Factory (ADF)**.
+   - Stored data in Parquet format for efficient storage and retrieval.
+
+2. Data Transformation (Silver Layer)
+   - Used Databricks and PySpark to clean, standardize, and preprocess data.
+   - Applied schema enforcement, null handling, deduplication, and type conversions.
+   - Stored transformed data in ADLS Gen2 Silver Layer for further processing.
+
+3. Data Modeling & Performance Optimization (Gold Layer)
+   - Modeled data into Fact and Dimension tables following Star Schema.
+   - Implemented Z-Ordering, Delta Vacuuming, and Partitioning to enhance query performance.
+   - Stored optimized data in the Gold Layer for analytics and reporting.
+
+4. Business Intelligence & Reporting
+   - Loaded processed data into Azure Synapse Analytics for interactive queries.
+   - Connected Synapse data to Power BI for real-time dashboards and reporting.
+
+ Business Value & Impact
+
+- Enhanced Data Usability: Standardized, structured, and cleaned data for business insights.
+- Optimized Query Performance: Reduced query execution time using performance tuning techniques.
+- Scalable & Automated Pipeline: Implemented a reusable ETL framework for continuous data processing.
+- Improved Decision-Making: Enabled dynamic dashboards with real-time analytics for e-commerce sales trends.
+
