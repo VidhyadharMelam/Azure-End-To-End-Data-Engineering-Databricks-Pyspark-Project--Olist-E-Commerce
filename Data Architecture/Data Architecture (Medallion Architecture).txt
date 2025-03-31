@@ -1,0 +1,78 @@
+
+
+Medallion Architecture for E-Commerce Data Processing:
+
+	Overview:
+
+		The Medallion Architecture is a layered approach to data processing that enhances scalability, performance, and data quality. This project follows the 		Medallion Architecture paradigm to structure and refine the Olist e-commerce dataset using Azure Data Factory, Azure Databricks, and Azure Data Lake 		Gen2.
+
+	Architecture Layers:
+
+		The architecture is divided into three key layers: Bronze, Silver, and Gold, each serving a distinct purpose in data transformation and processing.
+
+	Bronze Layer (Raw Data Ingestion)
+
+			Purpose: Store raw, unprocessed data as ingested from the source (web extraction of Olist dataset).
+
+			Storage: Azure Data Lake Gen2 (Bronze folder)
+
+			Processing: Data is pulled from the web and ingested into the Bronze layer using Azure Data Factory.
+
+			Format: Parquet files to maintain schema flexibility and optimize storage.
+
+			Key Considerations: Data remains unaltered to retain source integrity.
+
+	Silver Layer (Data Cleaning & Transformation)
+
+			Purpose: Apply data cleansing, transformation, and structuring to enhance usability.
+
+			Storage: Azure Data Lake Gen2 (Silver folder)
+
+			Processing: PySpark transformations in Azure Databricks to:
+
+			Clean and standardize data (handle null values, fix data types, remove duplicates)
+
+			Rename and reorganize columns for consistency
+
+			Apply schema validation and enforce business rules
+
+			Format: Delta tables to ensure data reliability and support ACID transactions.
+
+			Key Considerations: Ensuring data integrity and compliance with predefined business rules.
+
+	Gold Layer (Optimized Data for Analytics)
+
+			Purpose: Structure data into a Star Schema to support efficient querying and analytics.
+
+			Storage: Azure Data Lake Gen2 (Gold folder) with Delta format.
+
+			Processing: Advanced PySpark transformations in Azure Databricks to:
+
+			Create Fact and Dimension Tables (e.g., FactSales, DimCustomer, DimProduct, DimSeller)
+
+			Generate Surrogate Keys for optimized joins
+
+			Implement Aggregations for reporting and analytics
+
+			Optimize performance using Z-Ordering and Delta Vacuuming
+
+			Format: Delta Tables for efficient querying in Azure Synapse Analytics.
+
+			Key Considerations: Enhancing query performance and reducing storage costs.
+
+	Data Flow Diagram
+
+			A high-level representation of the Medallion Architecture:
+
+			Source (Web) → Bronze Layer (Raw) → Silver Layer (Transformed) → Gold Layer (Fact & Dimension Tables)
+
+	Business Impact
+
+			Improved Data Quality: Ensures accurate and structured data for analysis.
+
+			Optimized Performance: Query performance improved via Z-Ordering and Partitioning.
+
+			Scalability: Supports growing data volumes with structured processing.
+
+			Enhanced Reporting: Cleaned and aggregated data enables faster and more insightful analytics in Power BI.
+
