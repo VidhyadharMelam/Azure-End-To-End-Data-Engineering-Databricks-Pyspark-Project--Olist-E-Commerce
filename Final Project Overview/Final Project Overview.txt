@@ -1,0 +1,207 @@
+
+Final Project Overview:
+
+
+Step 1: Understanding the dataset:
+
+	Use the Olist E-commerce Dataset, which consists of multiple related tables covering orders, customers, products, sellers, payments, and geolocation.
+
+	Dataset Download: Olist E-commerce Dataset
+
+		Key Tables:
+
+			Orders – Order details (timestamps, status)
+
+			Customers – Customer info (location, ID)
+
+			Order Items – Product details in each order
+
+			Products – Product metadata
+
+			Sellers – Seller details (location, ID)
+
+			Payments – Payment transactions per order
+
+			Geolocation – Location data for customers and sellers
+
+			Reviews – Customer feedback on orders
+
+
+Step 2: Data Pipeline Stages
+
+	We will process data using three layers:
+
+		Bronze Layer (Raw Ingestion) – Load raw JSON/CSV data into ADLS Gen2.
+
+		Silver Layer (Refined Data) – Clean, standardize, and apply business logic.
+
+		Gold Layer (Business Aggregates) – Create Fact & Dimension Tables in a Star Schema.
+
+
+Step 3: PySpark Transformations for Silver Layer
+
+	The Silver Layer focuses on cleaning and structuring data before further processing.
+
+
+	Transformations in Silver Layer
+
+		✅ 1. Standardizing Column Names
+		✅ 2. Handling Missing & Null Values
+		✅ 3. Filtering Out Unnecessary Records
+		✅ 4. Standardizing Date Formats
+		✅ 5. Deduplicating Data
+		✅ 6. Extracting and Splitting Columns
+		✅ 7. Joining Related Tables for Enrichment
+		✅ 8. Formatting Data Types (String, Integer, Date, Boolean, etc.)
+
+
+Step 4: PySpark Transformations for Gold Layer
+
+	The Gold Layer organizes data into a Star Schema with Fact & Dimension Tables.
+
+	Fact & Dimension Tables (Star Schema)
+
+	📌 Fact Table:
+
+		FactOrders (Aggregates order details, payments, and seller transactions)
+
+	📌 Dimension Tables:
+
+		DimCustomer (Customer details)
+
+		DimProduct (Product metadata)
+
+		DimSeller (Seller info)
+
+		DimDate (Date-based analysis)
+
+
+	Transformations in Gold Layer:
+
+		✅ 1. Generating Surrogate Keys
+		✅ 2. Joining Multiple Tables to Create Facts & Dimensions
+		✅ 3. Aggregating Data for Reporting (SUM, COUNT, AVG, etc.)
+		✅ 4. Creating Slowly Changing Dimensions (SCD Type 1)
+		✅ 5. Optimizing for Query Performance (Partitioning, Z-Ordering)
+
+
+
+
+✅ Silver Layer Transformations (Raw to Cleaned Data):
+
+
+	The goal here is to clean and standardize the data before moving to the Gold layer.
+
+		✅Rename Columns for Better Readability
+
+		✅Convert column names from camelCase to snake_case.
+
+		✅Handle Missing and Null Values
+
+		✅Fill null values in categorical columns with "Unknown" or "Not Provided".
+
+		✅Replace null values in numerical columns with 0 or the mean/median.
+
+		✅Data Type Casting & Standardization
+
+		✅Convert string-based dates to TimestampType().
+
+		✅Convert price and amount fields to DecimalType() or DoubleType().
+
+		✅Standardize country codes (e.g., US → United States).
+
+		✅Extracting Date Components : Extract year, month, day, and weekday from date columns.
+
+		✅Create a derived_date_id column for joins.
+
+		✅Splitting and Extracting Information
+
+		✅Extract first and last names from full names.
+
+		✅Split address fields into street, city, state, and zip_code.
+
+		✅Combining Fields for Business Understanding : Merge first_name and last_name to create full_name.
+
+		✅Combine category and sub_category into a single field.
+
+		✅Remove Special Characters from Text Fields
+
+		✅Remove leading/trailing spaces and unwanted characters (\t, \n, >, $, etc.).
+
+		✅Data Deduplication
+
+		✅Identify and remove duplicate records based on customer and order IDs.
+
+		✅Standardizing Address and Location Data
+
+		✅Convert city names to title case ("NEW YORK" → "New York").
+
+		✅Fix inconsistent state abbreviations ("CA" → "California").
+
+		✅Filtering Invalid Data
+
+		✅Remove rows where mandatory fields (customer_id, order_id) are missing.
+
+		✅Filter out transactions with negative or zero prices.
+
+
+✅ Gold Layer Transformations (Building Star Schema):
+
+	Here, we refine the Silver data into Fact and Dimension tables.
+
+	✅Dimension Tables
+
+		✅DimCustomer (Customer Master Data)
+
+			✅Extract unique customer details.
+
+			✅Generate customer_sk (surrogate key).
+
+			✅Create a column to categorize customers (New, Returning, VIP).
+
+		✅DimProduct (Product Master Data)
+
+			✅Extract unique products with categories.
+
+			✅Generate product_sk (surrogate key).
+
+			✅Add product popularity ranking.
+
+
+		✅DimDate (Date Master Data)
+
+			✅Pre-populated calendar table.
+
+			✅Include week_number, fiscal_year, quarter.
+
+
+		✅DimLocation (Geographical Data)
+
+			✅Extract city, state, and country from addresses.
+
+			✅Generate location_sk for better joins.
+
+
+	✅Fact Tables
+
+		✅FactSales (Transaction-Level Sales Data)
+
+			✅Join order, customer, and product data.
+
+			✅Generate fact_sales_sk (surrogate key).
+
+			✅Add profit_margin calculation (revenue - cost).
+
+			✅Implement incremental loading (new sales only).
+
+			✅Store in Delta format.
+
+
+	✅FactSalesAggregation (Summary-Level Sales Data)
+
+		✅Aggregate daily/monthly sales at customer and product levels.
+
+		✅Calculate total revenue, discounts, and average order value.
+
+		✅Optimize table with ZORDER for faster queries.
+
