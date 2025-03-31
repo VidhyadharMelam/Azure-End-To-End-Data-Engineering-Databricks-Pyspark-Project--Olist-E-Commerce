@@ -1,0 +1,214 @@
+
+
+
+
+✅ Silver Layer Transformations (Raw to Cleaned Data):
+
+
+	The goal here is to clean and standardize the data before moving to the Gold layer.
+
+		✅Rename Columns for Better Readability
+
+		✅Convert column names from camelCase to snake_case.
+
+		✅Handle Missing and Null Values
+
+		✅Fill null values in categorical columns with "Unknown" or "Not Provided".
+
+		✅Replace null values in numerical columns with 0 or the mean/median.
+
+		✅Data Type Casting & Standardization
+
+		✅Convert string-based dates to TimestampType().
+
+		✅Convert price and amount fields to DecimalType() or DoubleType().
+
+		✅Standardize country codes (e.g., US → United States).
+
+		✅Extracting Date Components : Extract year, month, day, and weekday from date columns.
+
+		✅Create a derived_date_id column for joins.
+
+		✅Splitting and Extracting Information
+
+		✅Extract first and last names from full names.
+
+		✅Split address fields into street, city, state, and zip_code.
+
+		✅Combining Fields for Business Understanding : Merge first_name and last_name to create full_name.
+
+		✅Combine category and sub_category into a single field.
+
+		✅Remove Special Characters from Text Fields
+
+		✅Remove leading/trailing spaces and unwanted characters (\t, \n, >, $, etc.).
+
+		✅Data Deduplication
+
+		✅Identify and remove duplicate records based on customer and order IDs.
+
+		✅Standardizing Address and Location Data
+
+		✅Convert city names to title case ("NEW YORK" → "New York").
+
+		✅Fix inconsistent state abbreviations ("CA" → "California").
+
+		✅Filtering Invalid Data
+
+		✅Remove rows where mandatory fields (customer_id, order_id) are missing.
+
+		✅Filter out transactions with negative or zero prices.
+
+
+
+✅1. Load Data from Bronze Layer
+
+		
+		from pyspark.sql import SparkSession
+		from pyspark.sql.functions import col, when, lit, regexp_replace, split, concat_ws, trim, upper, lower, avg, countDistinct
+		from pyspark.sql.types import IntegerType, DoubleType, StringType, DateType, TimestampType
+
+		# Spark Session
+		
+		spark = SparkSession.builder.appName("SilverLayerProcessing").getOrCreate()
+
+		# Load tables from Bronze Layer
+
+		df_customers = spark.read.format("delta").load("abfss://bronze@olistdatalake0.dfs.core.windows.net/olist_customers_dataset.csv")
+		df_orders = spark.read.format("delta").load("abfss://bronze@olistdatalake0.dfs.core.windows.net/olist_orders_dataset.csv")
+		df_order_items = spark.read.format("delta").load("abfss://bronze@olistdatalake0.dfs.core.windows.net/olist_order_items_dataset.csv")
+		df_products = spark.read.format("delta").load("abfss://bronze@olistdatalake0.dfs.core.windows.net/olist_products_dataset.csv")
+		df_payments = spark.read.format("delta").load("abfss://bronze@olistdatalake0.dfs.core.windows.net/olist_payments_dataset.csv")
+		df_shipping = spark.read.format("delta").load("abfss://bronze@olistdatalake0.dfs.core.windows.net/olist_shipping_dataset.csv")
+
+
+✅2. Rename Columns for Better Readability
+
+
+		df_customers = df_customers.withColumnRenamed("customerID", "customer_id") \
+                           			.withColumnRenamed("firstName", "first_name") \
+                         			.withColumnRenamed("lastName", "last_name")
+
+
+		df_sellers = df_sellers.withColumnRenamed("_c0", "seller_id")\
+                        		.withColumnRenamed("_c1", "seller_zip_code")\
+                        		.withColumnRenamed("_c2", "seller_city")\
+                        		.withColumnRenamed("_c3", "seller_state")
+
+
+✅3. Remove first row from all columns in one operation
+
+
+		from pyspark.sql import Window
+		from pyspark.sql.functions import row_number, lit
+
+
+		# Remove first row from all columns in one operation
+		first_row = df_customers.limit(1)
+		df_customers = df_customers.exceptAll(first_row)
+
+
+✅4. Data Type Casting
+
+
+		df_orders = df_orders.withColumn("order_date", col("order_date").cast(TimestampType())) \
+                    			 .withColumn("total_amount", col("total_amount").cast(DoubleType()))\
+					 .withColumn("customer_id",col("customer_id").cast(StringType()))\
+                           		 .withColumn("customer_zip_code",col("customer_zip_code").cast(IntegerType()))
+
+		
+		df_order_items = df_order_items.withColumn("price", col("price").cast(DoubleType())) \
+                               			.withColumn("quantity", col("quantity").cast(IntegerType()))
+
+
+		df_products = df_products.withColumn("product_name_length", col("product_name_length").cast(IntegerType()))\
+                      .withColumn("product_description_length", col("product_description_length").cast(IntegerType()))\
+                      .withColumn("product_photos_quantity", col("product_photos_quantity").cast(IntegerType()))\
+                      .withColumn("product_weight_grams", col("product_weight_grams").cast(IntegerType()))\
+                      .withColumn("product_length_centimeter", col("product_length_centimeter").cast(IntegerType()))\
+                      .withColumn("product_height_centimeter", col("product_height_centimeter").cast(IntegerType()))\
+                      .withColumn("product_width_centimeter", col("product_width_centimeter").cast(IntegerType()))
+                          
+
+
+
+
+✅5. Handle Missing and Null Values
+
+
+		df_customers = df_customers.fillna(
+				{
+					"customer_zip_code": 0, 
+                                    	"customer_city": "Unknown",
+                                    	"customer_state": "Unknown",
+                                    	"customer_unique_id": "Unknown",
+                                    	"customer_id": "Unknown"
+                                    })
+			
+
+
+✅6. Remove Special Characters from Text Fields
+
+
+		df_customers = df_customers.withColumn("customer_unique_id", regexp_replace(col("customer_unique_id"), "[^a-zA-Z0-9 ]", ""))
+						.withColumn("product_id", regexp_replace(col("product_id"), "[^a-zA-Z0-9 ]", ""))\
+                                		.withColumn("seller_id", regexp_replace(col("seller_id"), "[^a-zA-Z0-9 ]", ""))
+
+
+		df_order_items = df_order_items.withColumn("order_id", regexp_replace(trim(col("order_id")),
+                      r'[,\t\n>$\*]{2,}',  # Remove repeated special chars
+                      ', '  # Replace with single comma+space
+                  ))
+
+
+		df_order_reviews = df_order_reviews.withColumn("review_id", regexp_replace(col("review_id"), "[^a-zA-Z0-9 ]", ""))\
+                                    			.withColumn("order_id", regexp_replace(col("order_id"), "[^a-zA-Z0-9 ]", ""))\
+                                    			.withColumn("review_comment_title", regexp_replace(col("review_comment_title"), "[^a-zA-Z0-9 ]", ""))\
+                                    			.withColumn("review_comment_message", regexp_replace(col("review_comment_message"), "[^a-zA-Z0-9 ]", ""))
+
+✅7. Combining Fields for Business Understanding
+
+
+		from pyspark.sql.functions import concat_ws, col
+
+		# Merge customer_city, customer_state, customer_zip_code into a single column called customer_full_address with proper formatting
+		 
+			df_customers = df_customers.withColumn("customer_full_address",concat_ws(" ", 
+       			 	col("customer_city"),
+        		 	col("customer_state"), 
+        			col("customer_zip_code")
+    			)
+		)
+
+
+
+✅8. yyyy-MM-DD Date Format
+
+
+		df_order_items = df_order_items.withColumn("shipping_limit_date",to_date("shipping_limit_date"))
+
+		display(df_order_items)
+
+
+
+✅9. Extracting Date Components
+
+
+		from pyspark.sql.functions import year, month, dayofmonth, dayofweek
+
+		df_order_items = df_order_items.withColumn("order_year", year(col("shipping_limit_date"))) \
+                    				.withColumn("order_month", month(col("shipping_limit_date"))) \
+                     				.withColumn("order_day", dayofmonth(col("shipping_limit_date"))) \
+                     				.withColumn("order_weekday", dayofweek(col("shipping_limit_date")))
+
+		display(df_order_items)
+
+
+
+✅10. LOAD : Store the Cleaned Data in the Silver Layer (Delta Format)
+
+
+		df_product_category_name_translation.write.format("delta")\
+           						 .mode("overwrite")\
+            						 .option("path", "abfss://silver@olistdatalake0.dfs.core.windows.net/product_category_name_translation")\
+            						 .save()
